@@ -2,12 +2,17 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MapPin } from "lucide-react";
-import { siteConfig } from "@/data/config";
+import type { LojaAdaptada } from "@/types/loja";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Localizacao() {
+interface LocalizacaoProps {
+  loja: LojaAdaptada;
+}
+
+export default function Localizacao({ loja }: LocalizacaoProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const temaEscuro = loja.cores.secondary === "#0A0A0A";
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -59,57 +64,66 @@ export default function Localizacao() {
     };
   }, []);
 
+  const endereco = loja.endereco.linhaCompleta || "Endereço sob consulta";
+
   return (
-    <section ref={sectionRef} id="localizacao" className="w-full bg-dark-elevated py-24">
+    <section
+      ref={sectionRef}
+      id="localizacao"
+      className="w-full py-24"
+      style={{ backgroundColor: temaEscuro ? "#141414" : loja.cores.secondary }}
+    >
       <div className="max-w-[1280px] mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
-          <span className="font-oswald text-xs font-medium uppercase tracking-[0.2em] text-gold block mb-4">
+          <span
+            className="font-oswald text-xs font-medium uppercase tracking-[0.2em] block mb-4"
+            style={{ color: loja.cores.primary }}
+          >
             ONDE ESTAMOS
           </span>
           <h2 className="font-oswald text-2xl sm:text-3xl lg:text-[36px] font-bold uppercase tracking-[0.05em] leading-[1.1] text-white">
-            VISITE NOSSO SHOWROOM
+            VISITE O SHOWROOM
           </h2>
         </div>
 
         {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Info Card */}
-          <div className="local-info lg:col-span-2 bg-dark-card rounded-xl p-10 lg:p-12 flex flex-col justify-center">
+          <div
+            className="local-info lg:col-span-2 rounded-xl p-10 lg:p-12 flex flex-col justify-center"
+            style={{ backgroundColor: temaEscuro ? "#1A1A1A" : "#ffffff" }}
+          >
             <div className="w-8 h-8 flex items-center justify-center mb-6">
-              <MapPin size={32} className="text-gold" />
+              <MapPin size={32} style={{ color: loja.cores.primary }} />
             </div>
             <p className="font-inter text-lg text-white leading-relaxed mb-6">
-              {siteConfig.address}
+              {endereco}
             </p>
             <div className="border-t border-white/[0.08] pt-6 mb-4">
               <p className="font-inter text-[15px] text-[#A0A0A0]">
-                {siteConfig.hours}
+                {loja.horario}
               </p>
             </div>
             <a
-              href={`https://api.whatsapp.com/send?phone=${siteConfig.whatsapp}`}
+              href={loja.whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-inter text-lg font-medium text-gold mt-4 hover:underline"
+              className="font-inter text-lg font-medium mt-4 hover:underline"
+              style={{ color: loja.cores.primary }}
             >
-              {siteConfig.phone}
+              {loja.telefone}
             </a>
           </div>
 
           {/* Map */}
-          <div className="local-map lg:col-span-3 rounded-xl overflow-hidden h-[400px]">
-            <iframe
-              src={siteConfig.mapUrl}
-              width="100%"
-              height="100%"
-              style={{ border: 0, filter: "grayscale(100%) invert(92%)" }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Localização Vrummm"
-              className="w-full h-full"
-            />
+          <div
+            className="local-map lg:col-span-3 rounded-xl overflow-hidden h-[400px] flex items-center justify-center"
+            style={{ backgroundColor: temaEscuro ? "#1A1A1A" : "#ffffff" }}
+          >
+            <p className="font-inter text-[#A0A0A0] text-center px-6">
+              Mapa será exibido quando o endereço completo for cadastrado.
+            </p>
           </div>
         </div>
       </div>

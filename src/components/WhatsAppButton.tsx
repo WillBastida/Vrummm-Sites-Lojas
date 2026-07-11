@@ -1,15 +1,18 @@
-import { siteConfig } from "@/data/config";
+import type { LojaAdaptada } from "@/types/loja";
 
-export default function WhatsAppButton() {
-  const whatsappUrl = `https://api.whatsapp.com/send?phone=${siteConfig.whatsapp}&text=${encodeURIComponent(siteConfig.whatsappMessage)}`;
+interface WhatsAppButtonProps {
+  loja: LojaAdaptada;
+}
 
+export default function WhatsAppButton({ loja }: WhatsAppButtonProps) {
   return (
     <a
-      href={whatsappUrl}
+      href={loja.whatsappLink}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contato via WhatsApp"
-      className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-whatsapp rounded-full flex items-center justify-center shadow-whatsapp whatsapp-pulse hover:scale-110 transition-transform duration-300"
+      className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-whatsapp whatsapp-pulse hover:scale-110 transition-transform duration-300"
+      style={{ backgroundColor: "#25D366" }}
     >
       <svg
         width="28"

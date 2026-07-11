@@ -1,8 +1,23 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import gsap from "gsap";
-import { heroSlides, siteConfig } from "@/data/config";
+import { heroSlides } from "@/data/config";
+import type { LojaAdaptada, VeiculoAdaptado } from "@/types/loja";
 
-export default function Hero() {
+interface HeroProps {
+  loja: LojaAdaptada;
+  veiculos?: VeiculoAdaptado[];
+}
+
+export default function Hero({ loja, veiculos = [] }: HeroProps) {
+  const destaques = veiculos.filter((v) => v.fotoCapa);
+  const slides =
+    destaques.length > 0
+      ? destaques.slice(0, 3).map((v) => ({
+          image: v.fotoCapa as string,
+          alt: v.titulo,
+        }))
+      : heroSlides;
+
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -47,11 +62,9 @@ export default function Hero() {
       const nextEl = imageRefs.current[nextIndex];
 
       if (currentEl && nextEl) {
-        // Set initial state of next
         gsap.set(nextEl, { x: "30%", opacity: 0, zIndex: 2 });
         gsap.set(currentEl, { zIndex: 1 });
 
-        // Animate out current, in next
         const tl = gsap.timeline({
           onComplete: () => {
             setCurrent(nextIndex);
@@ -60,12 +73,16 @@ export default function Hero() {
           },
         });
 
-        tl.to(currentEl, {
-          x: "-30%",
-          opacity: 0,
-          duration: 1.2,
-          ease: "power3.inOut",
-        }, 0);
+        tl.to(
+          currentEl,
+          {
+            x: "-30%",
+            opacity: 0,
+            duration: 1.2,
+            ease: "power3.inOut",
+          },
+          0
+        );
 
         tl.to(
           nextEl,
@@ -85,14 +102,14 @@ export default function Hero() {
   // Autoplay
   useEffect(() => {
     intervalRef.current = setInterval(() => {
-      const next = (current + 1) % heroSlides.length;
+      const next = (current + 1) % slides.length;
       transitionSlide(next);
     }, 5000);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [current, transitionSlide]);
+  }, [current, transitionSlide, slides.length]);
 
   // Mouse parallax
   useEffect(() => {
@@ -127,10 +144,11 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden bg-dark"
+      className="relative w-full h-screen overflow-hidden"
+      style={{ backgroundColor: loja.cores.secondary }}
     >
       {/* Background images */}
-      {heroSlides.map((slide, index) => (
+      {slides.map((slide, index) => (
         <div
           key={index}
           ref={(el) => { imageRefs.current[index] = el; }}
@@ -152,8 +170,7 @@ export default function Hero() {
       <div
         className="absolute inset-0 z-[2]"
         style={{
-          background:
-            "linear-gradient(to right, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.7) 40%, rgba(10,10,10,0.3) 100%)",
+          background: `linear-gradient(to right, ${loja.cores.secondary}F2 0%, ${loja.cores.secondary}B3 40%, ${loja.cores.secondary}4D 100%)`,
         }}
       />
 
@@ -162,14 +179,18 @@ export default function Hero() {
         ref={contentRef}
         className="relative z-[3] h-full flex flex-col justify-center max-w-[1280px] mx-auto px-6 lg:px-8"
       >
-        <span className="font-oswald text-xs font-medium uppercase tracking-[0.2em] text-gold mb-4 opacity-0">
-          {siteConfig.heroLabel}
+        <span
+          className="font-oswald text-xs font-medium uppercase tracking-[0.2em] mb-4 opacity-0"
+          style={{ color: loja.cores.primary }}
+        >
+          SHOWROOM PREMIUM
         </span>
         <h1 className="font-oswald text-4xl sm:text-5xl lg:text-[56px] font-bold uppercase tracking-[0.08em] leading-[1.0] text-white mb-5 max-w-[640px] opacity-0">
-          {siteConfig.heroTitle}
+          SEU PRÓXIMO CARRO ESTÁ AQUI.
         </h1>
         <p className="font-inter text-base lg:text-lg font-normal leading-relaxed text-[#A0A0A0] mb-10 max-w-[540px] opacity-0">
-          {siteConfig.heroSubtitle}
+          {loja.nome} tem seminovos e 0km multimarcas com atendimento consultivo
+          e transparência em cada etapa.
         </p>
         <div className="flex flex-wrap gap-4 opacity-0">
           <a
@@ -178,7 +199,8 @@ export default function Hero() {
               e.preventDefault();
               document.querySelector("#showroom")?.scrollIntoView({ behavior: "smooth" });
             }}
-            className="bg-gold text-dark px-9 py-3.5 font-oswald text-[13px] font-medium uppercase tracking-[0.12em] hover:bg-gold-light hover:scale-[1.02] transition-all duration-300"
+            className="text-dark px-9 py-3.5 font-oswald text-[13px] font-medium uppercase tracking-[0.12em] hover:scale-[1.02] transition-all duration-300"
+            style={{ backgroundColor: loja.cores.primary }}
           >
             Ver Veículos
           </a>
@@ -196,20 +218,23 @@ export default function Hero() {
       </div>
 
       {/* Carousel indicators */}
-      <div className="absolute bottom-10 left-6 lg:left-8 z-[3] flex items-center gap-2">
-        {heroSlides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handleIndicatorClick(index)}
-            className={`h-1 rounded-full transition-all duration-500 ${
-              index === current
-                ? "w-8 bg-gold"
-                : "w-3 bg-white/30 hover:bg-white/50"
-            }`}
-            aria-label={`Slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      {slides.length > 1 && (
+        <div className="absolute bottom-10 left-6 lg:left-8 z-[3] flex items-center gap-2">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handleIndicatorClick(index)}
+              className="h-1 rounded-full transition-all duration-500"
+              style={{
+                width: index === current ? "2rem" : "0.75rem",
+                backgroundColor:
+                  index === current ? loja.cores.primary : "rgba(255,255,255,0.3)",
+              }}
+              aria-label={`Slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

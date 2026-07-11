@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Search, Menu, X } from "lucide-react";
-import { siteConfig } from "@/data/config";
 import gsap from "gsap";
+import type { LojaAdaptada } from "@/types/loja";
+
+interface HeaderProps {
+  loja: LojaAdaptada;
+}
 
 const navLinks = [
   { label: "Seminovos", href: "#showroom" },
@@ -11,7 +15,7 @@ const navLinks = [
   { label: "Contato", href: "#localizacao" },
 ];
 
-export default function Header() {
+export default function Header({ loja }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -43,40 +47,39 @@ export default function Header() {
     setMobileOpen(false);
   };
 
+  const bgStyle = scrolled
+    ? { backgroundColor: `${loja.cores.secondary}F2` } // ~95% opacity
+    : { backgroundColor: `${loja.cores.secondary}CC` }; // ~80% opacity
+
   return (
     <>
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-50 h-[72px] transition-all duration-300 ${
-          scrolled
-            ? "bg-dark/95 backdrop-blur-xl border-b border-white/[0.06]"
-            : "bg-dark/80 backdrop-blur-md"
-        }`}
+        style={bgStyle}
+        className="fixed top-0 left-0 right-0 z-50 h-[72px] transition-all duration-300 backdrop-blur-xl border-b border-white/[0.06]"
       >
         <div className="max-w-[1280px] mx-auto h-full px-6 flex items-center justify-between">
           {/* Logo */}
           <a href="#" className="flex items-center gap-2">
-            <div className="w-8 h-8 flex items-center justify-center">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <path
-                  d="M8 4L16 28L24 4"
-                  stroke="#C8A45C"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M12 4L16 16L20 4"
-                  stroke="#C8A45C"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity="0.5"
-                />
-              </svg>
-            </div>
+            {loja.logoUrl ? (
+              <img
+                src={loja.logoUrl}
+                alt={loja.nome}
+                className="h-8 w-auto object-contain"
+              />
+            ) : (
+              <div
+                className="w-8 h-8 flex items-center justify-center rounded font-oswald font-bold text-sm"
+                style={{
+                  backgroundColor: loja.cores.primary,
+                  color: loja.cores.secondary,
+                }}
+              >
+                {loja.monograma}
+              </div>
+            )}
             <span className="font-oswald text-xl font-bold uppercase tracking-[0.15em] text-white">
-              {siteConfig.name}
+              {loja.nomeCurto}
             </span>
           </a>
 
@@ -97,12 +100,22 @@ export default function Header() {
           {/* Right side */}
           <div className="hidden lg:flex items-center gap-6">
             <span className="font-inter text-sm font-medium text-white">
-              {siteConfig.phone}
+              {loja.telefone}
             </span>
             <a
               href="#showroom"
               onClick={(e) => handleNavClick(e, "#showroom")}
-              className="flex items-center gap-2 border border-gold text-gold px-6 py-2.5 font-oswald text-xs uppercase tracking-[0.15em] hover:bg-gold hover:text-dark transition-all duration-300"
+              className="flex items-center gap-2 border px-6 py-2.5 font-oswald text-xs uppercase tracking-[0.15em] transition-all duration-300 hover:text-dark"
+              style={{
+                borderColor: loja.cores.primary,
+                color: loja.cores.primary,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = loja.cores.primary;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
             >
               <Search size={14} />
               Ver Veículos
@@ -122,23 +135,39 @@ export default function Header() {
 
       {/* Mobile Overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-dark/98 backdrop-blur-xl flex flex-col items-center justify-center gap-8 lg:hidden">
+        <div
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 lg:hidden"
+          style={{ backgroundColor: `${loja.cores.secondary}FA` }}
+        >
           {navLinks.map((link) => (
             <a
               key={link.label}
               href={link.href}
               onClick={(e) => handleNavClick(e, link.href)}
-              className="font-oswald text-2xl font-semibold uppercase tracking-[0.1em] text-white hover:text-gold transition-colors duration-300"
+              className="font-oswald text-2xl font-semibold uppercase tracking-[0.1em] text-white transition-colors duration-300"
+              style={{ "--hover-color": loja.cores.primary } as React.CSSProperties}
+              onMouseEnter={(e) => (e.currentTarget.style.color = loja.cores.primary)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "white")}
             >
               {link.label}
             </a>
           ))}
           <div className="mt-4 text-center">
-            <p className="font-inter text-lg text-white mb-4">{siteConfig.phone}</p>
+            <p className="font-inter text-lg text-white mb-4">{loja.telefone}</p>
             <a
               href="#showroom"
               onClick={(e) => handleNavClick(e, "#showroom")}
-              className="inline-flex items-center gap-2 border border-gold text-gold px-8 py-3 font-oswald text-sm uppercase tracking-[0.15em] hover:bg-gold hover:text-dark transition-all duration-300"
+              className="inline-flex items-center gap-2 border px-8 py-3 font-oswald text-sm uppercase tracking-[0.15em] transition-all duration-300 hover:text-dark"
+              style={{
+                borderColor: loja.cores.primary,
+                color: loja.cores.primary,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = loja.cores.primary;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }}
             >
               <Search size={16} />
               Ver Veículos

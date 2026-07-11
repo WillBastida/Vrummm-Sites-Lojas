@@ -2,10 +2,15 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight } from "lucide-react";
+import type { LojaAdaptada } from "@/types/loja";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Sobre() {
+interface SobreProps {
+  loja: LojaAdaptada;
+}
+
+export default function Sobre({ loja }: SobreProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,13 +63,18 @@ export default function Sobre() {
   }, []);
 
   return (
-    <section ref={sectionRef} id="sobre" className="w-full bg-dark py-24">
+    <section
+      ref={sectionRef}
+      id="sobre"
+      className="w-full py-24"
+      style={{ backgroundColor: loja.cores.secondary }}
+    >
       <div className="max-w-[1280px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
         {/* Image */}
         <div className="sobre-image rounded-xl overflow-hidden aspect-[4/3]">
           <img
             src="/images/showroom-interior.jpg"
-            alt="Interior do showroom Vrummm"
+            alt={`Showroom ${loja.nomeCurto}`}
             className="w-full h-full object-cover"
             loading="lazy"
           />
@@ -72,21 +82,17 @@ export default function Sobre() {
 
         {/* Text */}
         <div>
-          <span className="sobre-text-anim font-oswald text-xs font-medium uppercase tracking-[0.2em] text-gold block mb-4">
+          <span
+            className="sobre-text-anim font-oswald text-xs font-medium uppercase tracking-[0.2em] block mb-4"
+            style={{ color: loja.cores.primary }}
+          >
             SOBRE NÓS
           </span>
           <h2 className="sobre-text-anim font-oswald text-2xl sm:text-3xl lg:text-[36px] font-bold uppercase tracking-[0.05em] leading-[1.1] text-white mb-6">
             CONFIANÇA E EXCELÊNCIA EM CADA NEGOCIAÇÃO
           </h2>
-          <p className="sobre-text-anim font-inter text-base text-[#A0A0A0] leading-[1.7] mb-4">
-            A Vrummm nasceu da paixão por carros e do compromisso com a
-            transparência. Há mais de 15 anos, conectamos pessoas aos veículos
-            dos sonhos com atendimento consultivo e curadoria premium.
-          </p>
           <p className="sobre-text-anim font-inter text-base text-[#A0A0A0] leading-[1.7] mb-6">
-            Cada veículo em nosso showroom passa por uma inspeção rigorosa de
-            mais de 150 itens. Não vendemos carros. Entregamos confiança sobre
-            quatro rodas.
+            {loja.sobre}
           </p>
           <a
             href="#localizacao"
@@ -94,7 +100,8 @@ export default function Sobre() {
               e.preventDefault();
               document.querySelector("#localizacao")?.scrollIntoView({ behavior: "smooth" });
             }}
-            className="sobre-text-anim inline-flex items-center gap-2 font-oswald text-[13px] font-medium uppercase tracking-[0.1em] text-gold hover:translate-x-1 hover:underline transition-all duration-300"
+            className="sobre-text-anim inline-flex items-center gap-2 font-oswald text-[13px] font-medium uppercase tracking-[0.1em] hover:translate-x-1 hover:underline transition-all duration-300"
+            style={{ color: loja.cores.primary }}
           >
             Conheça nossa história
             <ArrowRight size={14} />
